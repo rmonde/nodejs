@@ -1,4 +1,7 @@
-export.handler =  function(context,event,callback) {
-    console.log('Welcome to first node js project,V1.0')
-    callback('Hello world')
-}
+exports.handler = async (event) => {
+    let {name,title} = event;
+    return {
+        status: 200,
+        msg: 'Welcome ' + title + ' ' + name + ' to the world of AWS version 1'
+    }
+};

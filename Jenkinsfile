@@ -24,7 +24,7 @@ pipeline {
               steps {
                     echo 'Building Branch: ' + env.BRANCH_NAME
                     echo 'Build Number: ' + env.BUILD_NUMBER
-                    echo 'Building Environment: ' + ENV_NAME
+                    //echo 'Building Environment: ' + ENV_NAME
                     echo "Building the project"
                     sh 'npm install'
                     sh "zip ${commitID()}.zip * -x Jenkinsfile README.md"
@@ -72,4 +72,16 @@ pipeline {
          }
          */
       }
+      post {
+        // Use this block to perform clean up activity such as deleting workspace etc. 
+        always { 
+            cleanWs()
+        }
+        success {
+            echo "=====Build and Deployment completed successfully"
+        }
+        failure {
+            echo "=====Unable to complete the build,please check the console output and fix the problem======"
+        }
+    }
 }

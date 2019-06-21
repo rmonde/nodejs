@@ -21,7 +21,7 @@ pipeline {
             }
 
         stage('Push'){
-            step{
+            steps{
                 echo "Pushing the code to s3 bucket"
                 sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
             }
@@ -29,7 +29,7 @@ pipeline {
         }
 
         stage('Deploy'){
-            step {
+            steps {
                 echo "Deploying the code to lambda function"
                 sh "aws lambda update-function-code --function-name ${functionName} \
                     --s3-bucket ${bucket} \
@@ -41,11 +41,13 @@ pipeline {
 
         if (env.BRANCH_NAME == 'master') {
             stage('Publish') {
-                def lambdaVersion = sh(
+                steps {
+                    def lambdaVersion = sh(
                     script: "aws lambda publish-version --function-name ${functionName} --region ${region} | jq -r '.Version'",
                     returnStdout: true
-                )
-                sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"
+                    )
+                    sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"   
+                }              
             }
         }
       }

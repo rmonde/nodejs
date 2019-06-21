@@ -1,9 +1,15 @@
+def bucket = 'myjenkinsbucket'
+def functionName = 'greetings'
+def region = 'us-east-1'
+
+def commitID() {
+        sh 'git rev-parse HEAD > .git/commitID'
+        def commitID = readFile('.git/commitID').trim()
+        sh 'rm .git/commitID'
+        commitID
+}
+
 pipeline {
-
-    def bucket = 'myjenkinsbucket'
-    def functionName = 'greetings'
-    def region = 'us-east-1'
-
     agent any
 
         // stage('Test'){
@@ -42,11 +48,4 @@ pipeline {
                 sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"
             }
         }
-
-    def commitID() {
-        sh 'git rev-parse HEAD > .git/commitID'
-        def commitID = readFile('.git/commitID').trim()
-        sh 'rm .git/commitID'
-        commitID
-    }
 }

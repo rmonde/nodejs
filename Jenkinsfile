@@ -12,7 +12,7 @@ def commitID() {
 pipeline {
     agent any
     tools {
-        npm 'localnode'
+        nodejs 'localnode'
     }
       stages {
           stage('Build'){

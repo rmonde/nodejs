@@ -50,11 +50,13 @@ pipeline {
         }
 
         stage('Publish') {
-            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
                 def lambdaVersion = sh(
                     script: "aws lambda publish-version --function-name ${functionName} --region ${region} | jq -r '.Version'", returnStdout: true
                 )
                 sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"
+              }
             }
         }
 

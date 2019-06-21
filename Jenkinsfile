@@ -26,7 +26,7 @@ pipeline {
 
         stage('Push'){
             steps{
-                echo "Pushing the code to s3 bucket " ${bucket}
+                echo "Pushing the code to s3 bucket "
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
                     sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
                 }
@@ -39,7 +39,7 @@ pipeline {
 
         stage('Deploy'){
             steps {
-                echo "Code deployment of lambda function " ${functionName}
+                echo "Code deployment of lambda function "
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
                 sh "aws lambda update-function-code --function-name ${functionName} \
                     --s3-bucket ${bucket} \
@@ -52,12 +52,14 @@ pipeline {
 
         stage('Publish') {
             steps {
-                echo "Publishing function version and updating alias of " ${functionName}
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
-                lambdaVersion = sh(
-                    script: "aws lambda publish-version --function-name ${functionName} --region ${region} | jq -r '.Version'", returnStdout: true
-                )
-                sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"
+                echo "Publishing function version and updating alias"
+                script {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
+                    lambdaVersion = sh(
+                        script: "aws lambda publish-version --function-name ${functionName} --region ${region} | jq -r '.Version'", returnStdout: true
+                    )
+                    sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"
+                }
               }
             }
         }

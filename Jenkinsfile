@@ -19,7 +19,7 @@ pipeline {
               steps {
                     echo "Building the project"
                     sh 'npm install'
-                    sh "zip ${commitID()}.zip *"
+                    sh "zip --exclude=*Jenkinsfile* ${commitID()}.zip *"
                 }
             }
 
@@ -44,9 +44,18 @@ pipeline {
                     --s3-bucket ${bucket} \
                     --s3-key ${commitID()}.zip \
                     --region ${region}"
+                    // -- publish true" --> use this to publish new version
+                }
             }
         }
-            
+
+        stage('Publish') {
+            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
+                def lambdaVersion = sh(
+                    script: "aws lambda publish-version --function-name ${functionName} --region ${region} | jq -r '.Version'", returnStdout: true
+                )
+                sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"
+            }
         }
 
         // if (env.BRANCH_NAME == 'master') {

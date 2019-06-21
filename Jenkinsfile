@@ -26,9 +26,11 @@ pipeline {
         stage('Push'){
             steps{
                 echo "Pushing the code to s3 bucket"
-                sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
+                // sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
+                withAWS(credentials:'aws-s3-bucket') {
+                    file: "${commitID()}.zip", bucket:"${bucket}"
+                }
             }
-            
         }
 
         stage('Deploy'){

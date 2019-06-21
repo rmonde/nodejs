@@ -12,34 +12,37 @@ def commitID() {
 
 pipeline {
     agent any
+    environment {
+        // Make use of this environment variable to build deployment logic
+        ENV_NAME = "${env.BRANCH_NAME}"
+    }
     tools {
         nodejs 'localnode'
     }
       stages {
           stage('Build'){
               steps {
+                    echo 'Building Branch: ' + env.BRANCH_NAME
+                    echo 'Build Number: ' + env.BUILD_NUMBER
+                    echo 'Building Environment: ' + ENV_NAME
                     echo "Building the project"
                     sh 'npm install'
-                    sh "zip --exclude=*Jenkinsfile* ${commitID()}.zip *"
+                    sh "zip ${commitID()}.zip * -x Jenkinsfile README.md"
                 }
             }
 
         stage('Push'){
             steps{
-                echo "Pushing the code to s3 bucket "
+                echo "Pushing the code to s3 bucket ${bucket}"
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
                     sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
                 }
-                // sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
-                // withAWS(credentials:'aws-s3-bucket',region: 'us-east-1') {
-                //     s3Upload(file: 'index.zip', bucket:'myjenkinsbucket')
-                // }
             }
         }
 
         stage('Deploy'){
             steps {
-                echo "Code deployment of lambda function "
+                echo "Code deployment of lambda function ${functionName}"
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
                 sh "aws lambda update-function-code --function-name ${functionName} \
                     --s3-bucket ${bucket} \
@@ -64,16 +67,9 @@ pipeline {
             }
         }
 
-        // if (env.BRANCH_NAME == 'master') {
-        //     stage('Publish') {
-        //         steps {
-        //             def lambdaVersion = sh(
-        //             script: "aws lambda publish-version --function-name ${functionName} --region ${region} | jq -r '.Version'",
-        //             returnStdout: true
-        //             )
-        //             sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"   
-        //         }              
-        //     }
-        // }
+        /* if (env.BRANCH_NAME == 'master') {
+           Write a logic based on branch name, for e.g. Master 
+         }
+         */
       }
 }

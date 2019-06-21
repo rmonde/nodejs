@@ -13,22 +13,30 @@ pipeline {
     agent any
       stages {
           stage('Build'){
-            echo "Building the project"
-            sh 'npm install'
-            sh "zip ${commitID()}.zip main"
-        }
+              steps {
+                    echo "Building the project"
+                    sh 'npm install'
+                    sh "zip ${commitID()}.zip main"
+                }
+            }
 
         stage('Push'){
-            echo "Pushing the code to s3 bucket"
-            sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
+            step{
+                echo "Pushing the code to s3 bucket"
+                sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
+            }
+            
         }
 
         stage('Deploy'){
-            echo "Deploying the code to lambda function"
-            sh "aws lambda update-function-code --function-name ${functionName} \
+            step {
+                echo "Deploying the code to lambda function"
+                sh "aws lambda update-function-code --function-name ${functionName} \
                     --s3-bucket ${bucket} \
                     --s3-key ${commitID()}.zip \
                     --region ${region}"
+            }
+            
         }
 
         if (env.BRANCH_NAME == 'master') {

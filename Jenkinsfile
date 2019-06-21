@@ -11,16 +11,8 @@ def commitID() {
 
 pipeline {
     agent any
-
-        // stage('Test'){
-        //     sh 'go get -u github.com/golang/lint/golint'
-        //     sh 'go get -t ./...'
-        //     sh 'golint -set_exit_status'
-        //     sh 'go vet .'
-        //     sh 'go test .'
-        // }
-
-        stage('Build'){
+      stages {
+          stage('Build'){
             echo "Building the project"
             sh 'npm install'
             sh "zip ${commitID()}.zip main"
@@ -48,4 +40,5 @@ pipeline {
                 sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"
             }
         }
+      }
 }

@@ -39,11 +39,13 @@ pipeline {
         stage('Deploy'){
             steps {
                 echo "Deploying the code to lambda function"
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
                 sh "aws lambda update-function-code --function-name ${functionName} \
                     --s3-bucket ${bucket} \
                     --s3-key ${commitID()}.zip \
                     --region ${region}"
             }
+        }
             
         }
 

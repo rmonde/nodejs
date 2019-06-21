@@ -26,10 +26,13 @@ pipeline {
         stage('Push'){
             steps{
                 echo "Pushing the code to s3 bucket"
-                // sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
-                withAWS(credentials:'aws-s3-bucket',region: 'us-east-1') {
-                    s3Upload(file: 'index.zip', bucket:'myjenkinsbucket')
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-bucket']]) {
+                    sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
                 }
+                // sh "aws s3 cp ${commitID()}.zip s3://${bucket}"
+                // withAWS(credentials:'aws-s3-bucket',region: 'us-east-1') {
+                //     s3Upload(file: 'index.zip', bucket:'myjenkinsbucket')
+                // }
             }
         }
 

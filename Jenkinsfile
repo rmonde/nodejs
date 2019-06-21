@@ -39,16 +39,16 @@ pipeline {
             
         }
 
-        if (env.BRANCH_NAME == 'master') {
-            stage('Publish') {
-                steps {
-                    def lambdaVersion = sh(
-                    script: "aws lambda publish-version --function-name ${functionName} --region ${region} | jq -r '.Version'",
-                    returnStdout: true
-                    )
-                    sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"   
-                }              
-            }
-        }
+        // if (env.BRANCH_NAME == 'master') {
+        //     stage('Publish') {
+        //         steps {
+        //             def lambdaVersion = sh(
+        //             script: "aws lambda publish-version --function-name ${functionName} --region ${region} | jq -r '.Version'",
+        //             returnStdout: true
+        //             )
+        //             sh "aws lambda update-alias --function-name ${functionName} --name dev --region ${region} --function-version ${lambdaVersion}"   
+        //         }              
+        //     }
+        // }
       }
 }

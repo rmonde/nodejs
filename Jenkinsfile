@@ -19,7 +19,7 @@ pipeline {
               steps {
                     echo "Building the project"
                     sh 'npm install'
-                    sh "zip ${commitID()}.zip main"
+                    sh "zip ${commitID()}.zip *"
                 }
             }
 
